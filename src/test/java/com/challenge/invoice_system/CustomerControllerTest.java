@@ -47,7 +47,7 @@ public class CustomerControllerTest {
     @DisplayName("Debe retornar error 400 cuando el nombre del cliente es nulo o vacío")
     public void shouldReturnBadRequestWhenCustomerNameIsMissing() throws Exception {
         Customer customer = new Customer();
-        customer.setName(""); // Nombre vacío
+        customer.setName("");
         customer.setEmail("error@test.com");
         customer.setAddress("Direccion");
 

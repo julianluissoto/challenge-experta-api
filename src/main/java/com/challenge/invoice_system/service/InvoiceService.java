@@ -29,8 +29,9 @@ public class InvoiceService {
 
     @Transactional
     public InvoiceResponseDTO saveInvoice(Invoice request) {
+        Long idCustomer = request.getCustomerId().getId();
 
-        Customer customer = customerRepository.findById(request.getCustomerId())
+        Customer customer = customerRepository.findById(idCustomer)
                 .orElseThrow(() -> new BusinessException("El cliente con ID " + request.getCustomerId() + " no existe."));
 
 

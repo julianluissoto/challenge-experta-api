@@ -18,7 +18,10 @@ public class Invoice {
 
     private String invoiceNumber;
     private LocalDate date;
-    private Long customerId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customerId;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "invoice_id")

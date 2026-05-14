@@ -2,6 +2,7 @@ package com.challenge.invoice_system.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
                 "Error interno del servidor",
                 "Ocurrió un error inesperado. Por favor, contacte al soporte."
         );
+    }
+
+    // Error de falta campo
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        return buildResponse(HttpStatus.BAD_REQUEST, "Datos inválidos", message);
     }
 
 
