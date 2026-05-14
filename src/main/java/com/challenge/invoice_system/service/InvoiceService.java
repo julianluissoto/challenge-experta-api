@@ -38,7 +38,6 @@ public class InvoiceService {
         String generatedNumber = String.format("FACTURA-%04d", nextId);
         request.setInvoiceNumber(generatedNumber);
 
-        // 3. Procesar Items y validar duplicados
         Set<String> productNames = new HashSet<>();
         BigDecimal totalGeneral = BigDecimal.ZERO;
 
