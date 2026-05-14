@@ -1,6 +1,7 @@
 package com.challenge.invoice_system.service;
 
 import com.challenge.invoice_system.dto.InvoiceItemDTO;
+import com.challenge.invoice_system.dto.InvoiceRequestDTO;
 import com.challenge.invoice_system.dto.InvoiceResponseDTO;
 import com.challenge.invoice_system.exception.BusinessException;
 import com.challenge.invoice_system.model.Customer;
@@ -28,26 +29,30 @@ public class InvoiceService {
     private CustomerRepository customerRepository;
 
     @Transactional
-    public InvoiceResponseDTO saveInvoice(Invoice request) {
-        Long idCustomer = request.getCustomerId().getId();
-        ;
+    public InvoiceResponseDTO saveInvoice(InvoiceRequestDTO request) {
 
-        Customer customer = customerRepository.findById(idCustomer)
+        Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new BusinessException("El cliente con ID " + request.getCustomerId() + " no existe."));
 
 
-        long nextId = invoiceRepository.count() + 1;
-        String generatedNumber = String.format("FACTURA-%04d", nextId);
-        request.setInvoiceNumber(generatedNumber);
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(customer);
 
-        Set<String> productNames = new HashSet<>();
-        BigDecimal totalGeneral = BigDecimal.ZERO;
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new BusinessException("La factura debe tener al menos un producto.");
         }
+        invoice.setItems(request.getItems());
 
-        for (InvoiceItem item : request.getItems()) {
+
+        long nextId = invoiceRepository.count() + 1;
+        invoice.setInvoiceNumber(String.format("FACTURA-%04d", nextId));
+
+
+        Set<String> productNames = new HashSet<>();
+        BigDecimal totalGeneral = BigDecimal.ZERO;
+
+        for (InvoiceItem item : invoice.getItems()) {
             String productName = item.getProductName().trim().toLowerCase();
 
             if (productNames.contains(productName)) {
@@ -55,19 +60,22 @@ public class InvoiceService {
             }
             productNames.add(productName);
 
-            if (item.getUnitPrice() != null && item.getQuantity() != null) {
-                BigDecimal subtotal = item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()));
-                item.setSubtotal(subtotal);
-                totalGeneral = totalGeneral.add(subtotal);
+
+            if (item.getUnitPrice() == null || item.getQuantity() == null) {
+                throw new BusinessException("El precio unitario y la cantidad son obligatorios.");
             }
 
-            item.setInvoice(request);
+            BigDecimal subtotal = item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()));
+            item.setSubtotal(subtotal);
+            totalGeneral = totalGeneral.add(subtotal);
+
+            item.setInvoice(invoice);
         }
 
-        request.setTotal(totalGeneral);
-        request.setDate(LocalDate.now());
+        invoice.setTotal(totalGeneral);
+        invoice.setDate(LocalDate.now());
 
-        Invoice savedInvoice = invoiceRepository.save(request);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
 
         return convertToDTO(savedInvoice, customer.getName());
     }
