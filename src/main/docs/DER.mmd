@@ -1,0 +1,29 @@
+classDiagram
+    class Customer {
+        +Long id
+        +String name
+        +String email
+        +String address
+    }
+
+    class Invoice {
+        +Long id
+        +String invoiceNumber
+        +LocalDate date
+        +Long customerId
+        +List~InvoiceItem~ items
+        +BigDecimal total
+        +addItems(List~InvoiceItem~ items)
+    }
+
+    class InvoiceItem {
+        +Long id
+        +String productName
+        +Integer quantity
+        +BigDecimal unitPrice
+        +BigDecimal subtotal
+        +Invoice invoice
+    }
+
+    Invoice "1" --* "n" InvoiceItem: contiene
+    Customer "1" --o "n" Invoice: posee

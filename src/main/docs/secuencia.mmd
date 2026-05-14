@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant UI as Frontend (React)
+    participant C as InvoiceController
+    participant S as InvoiceService
+    participant R as InvoiceRepository
+    participant DB as Base de Datos (Postgresql)
+    UI ->> C: POST /api/invoices (JSON)
+    C ->> S: saveInvoice(invoice)
+
+    loop Validar Ítems
+        S ->> S: Normalizar nombre producto
+        alt Producto Duplicado
+            S -->> C: throw BusinessException
+            C -->> UI: 400 Bad Request (JSON Error)
+        else Producto Único
+            S ->> S: Calcular subtotal (precio * cant)
+            S ->> S: Acumular Total General
+        end
+    end
+
+    S ->> S: Vincular items con la factura (setInvoice)
+    S ->> R: save(invoice)
+    R ->> DB: INSERT en db
+    DB -->> R: OK (ID generado)
+    R -->> S: Invoice persistida
+    S -->> C: Invoice con totales calculados
+    C -->> UI: 201 Created (JSON Response)
