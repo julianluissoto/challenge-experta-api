@@ -11,8 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = "*")
-// Permite que React se conecte sin problemas de CORS//TODO MODIFICAR PARA SOLO ACEPTRA LA APP DE REACT DESPLEGADA
 public class CustomerController {
 
     @Autowired
